@@ -17,11 +17,14 @@
     "@mui/material": "^7.3.2",
     "@supabase/supabase-js": "^2.57.4",
     "@types/node": "^24.5.2",
+    "@zxing/library": "^0.21.3",
+    "jsqr": "^1.4.0",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-qr-barcode-scanner": "^2.1.17",
     "react-router-dom": "^7.9.1",
-    "real-scanner": "^1.0.4",
+    "react-zxing": "^2.1.0",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

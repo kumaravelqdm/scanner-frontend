@@ -1,138 +1,185 @@
-import React, { useState, useRef } from 'react';
-import { Box, Button, TextField, Typography, Alert, Tabs, Tab, CircularProgress } from '@mui/material';
+import { useState } from "react";
+import { useZxing } from "react-zxing";
+import {
+  Container,
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  Box,
+  Alert,
+  Button,
+  Paper,
+} from "@mui/material";
+import { QrCode, Copy, CheckCircle, AlertCircle } from "lucide-react";
 
-import * as RealScannerModule from 'real-scanner';
-const RealScanner = RealScannerModule.RealScanner;
+export const Validate = () => {
+  const [barcode, setBarcode] = useState("");
+  const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
 
-export const Validate: React.FC = () => {
-  const [accessKey, setAccessKey] = useState('');
-  const [secret, setSecret] = useState('');
-  const [scanner, setScanner] = useState<any | null>(null);
-  const [isReady, setIsReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [tab, setTab] = useState(0);
-  const [scanResult, setScanResult] = useState<string | null>(null);
-  const [scanning, setScanning] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const { ref } = useZxing({
+    onDecodeResult(result) {
+      setBarcode(result.getText());
+      setError("");
+    },
+    onDecodeError() {
+      // Avoid spamming errors, only show one occasionally
+      if (!error) setError("Scanning...");
+    },
+  });
 
-  const handleValidate = async () => {
-    setError(null);
-    setSuccess(null);
-    setScanResult(null);
-    try {
-      const realScanner = new RealScanner({
-        accessKey,
-        secret,
-        onScanSuccess: (result: any) => {
-          setScanResult(result.getText());
-        },
-        onScanError: (err: any) => {
-          setError(err.message || 'Scan error');
-        }
-      });
-      const valid = await realScanner.initialize();
-      if (valid) {
-        setScanner(realScanner);
-        setIsReady(true);
-        setSuccess('API Key validated successfully!');
-      } else {
-        setError('Invalid API credentials');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Validation failed');
+  const handleCopy = () => {
+    if (barcode) {
+      navigator.clipboard.writeText(barcode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
-  const handleStartScanning = async () => {
-    if (!scanner || !videoRef.current) return;
-    setScanning(true);
-    setScanResult(null);
-    setError(null);
-    try {
-      await scanner.startScanning({ videoElement: videoRef.current });
-    } catch (err: any) {
-      setError(err.message || 'Failed to start scanning');
-    }
-    setScanning(false);
-  };
-
-  const handleStopScanning = () => {
-    if (scanner) {
-      scanner.stopScanning();
-      setScanning(false);
-    }
+  const handleReset = () => {
+    setBarcode("");
+    setError("");
   };
 
   return (
-    <Box maxWidth={500} mx="auto" mt={8} p={4} boxShadow={3} borderRadius={2} bgcolor="#fff">
-      <Typography variant="h5" mb={2} fontWeight={700}>Validate API Key</Typography>
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
-        <Tab label="Validate" />
-        <Tab label="Video Scan" disabled={!isReady} />
-      </Tabs>
-      {tab === 0 && (
-        <>
-          <TextField
-            label="Access Key"
-            fullWidth
-            margin="normal"
-            value={accessKey}
-            onChange={e => setAccessKey(e.target.value)}
-          />
-          <TextField
-            label="Secret Key"
-            fullWidth
-            margin="normal"
-            type="password"
-            value={secret}
-            onChange={e => setSecret(e.target.value)}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2, mb: 2 }}
-            onClick={handleValidate}
-            disabled={!accessKey || !secret}
-          >
-            Validate
-          </Button>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
-          {isReady && (
-            <Alert severity="info">Scanner is ready! You can now use scanning features.</Alert>
-          )}
-        </>
-      )}
-      {tab === 1 && (
-        <Box>
-          <Typography mb={2}>Scan QR/Barcode using your camera</Typography>
-          <video ref={videoRef} width={400} height={300} style={{ borderRadius: 8, border: '1px solid #ccc' }} autoPlay muted />
-          <Box display="flex" gap={2} mt={2}>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={handleStartScanning}
-              disabled={scanning}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12">
+      <Container maxWidth="md">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <div className="bg-blue-100 p-4 rounded-full">
+                <QrCode className="h-8 w-8 text-blue-600" />
+              </div>
+            </div>
+            <Typography variant="h3" className="font-bold text-gray-900 mb-2">
+              Scanner Validator
+            </Typography>
+            <Typography variant="body1" className="text-gray-600">
+              Scan QR codes and barcodes in real-time
+            </Typography>
+          </div>
+
+          {/* Scanner Card */}
+          <Card className="shadow-lg">
+            <CardHeader
+              title="Live Scanner"
+              subheader="Point your camera at a QR code or barcode"
+              titleTypographyProps={{ variant: "h6" }}
+            />
+            <CardContent>
+              <Box className="flex flex-col items-center gap-6">
+                <Paper
+                  elevation={3}
+                  className="overflow-hidden bg-black rounded-lg"
+                >
+                  <video
+                    ref={ref}
+                    className="w-full h-96 object-cover"
+                  />
+                </Paper>
+
+                {/* Status Indicator */}
+                <Box className="flex items-center gap-2 text-sm">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <Typography variant="body2" className="text-green-600">
+                    Scanner active
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+
+          {/* Results Card */}
+          <Card className="shadow-lg">
+            <CardHeader
+              title="Scan Result"
+              titleTypographyProps={{ variant: "h6" }}
+            />
+            <CardContent className="space-y-4">
+              {barcode ? (
+                <div className="space-y-4">
+                  <Box className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                    <Box className="flex items-center gap-2 mb-3">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <Typography variant="subtitle2" className="text-green-900">
+                        Barcode Detected
+                      </Typography>
+                    </Box>
+                    <Paper className="bg-white p-3 rounded border border-green-100 font-mono text-sm break-all">
+                      {barcode}
+                    </Paper>
+                  </Box>
+
+                  <Box className="flex gap-3">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={<Copy className="h-4 w-4" />}
+                      onClick={handleCopy}
+                      fullWidth
+                    >
+                      {copied ? "Copied!" : "Copy"}
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      onClick={handleReset}
+                      fullWidth
+                    >
+                      Reset
+                    </Button>
+                  </Box>
+                </div>
+              ) : (
+                <Box className="text-center py-8">
+                  <QrCode className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                  <Typography variant="body2" className="text-gray-500">
+                    No barcode detected yet
+                  </Typography>
+                  <Typography variant="caption" className="text-gray-400">
+                    Position a QR code or barcode in front of your camera
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Error Alert */}
+          {error && error !== "Scanning..." && (
+            <Alert
+              severity="warning"
+              icon={<AlertCircle className="h-5 w-5" />}
+              onClose={() => setError("")}
+              className="rounded-lg"
             >
-              {scanning ? <CircularProgress size={20} /> : 'Start Scanning'}
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={handleStopScanning}
-              disabled={!scanning}
-            >
-              Stop
-            </Button>
-          </Box>
-          {scanResult && (
-            <Alert severity="success" sx={{ mt: 2 }}>Scanned: {scanResult}</Alert>
+              {error}
+            </Alert>
           )}
-          {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-        </Box>
-      )}
-    </Box>
+
+          {/* Info Card */}
+          <Card className="bg-blue-50 border border-blue-200">
+            <CardContent>
+              <Box className="flex gap-3">
+                <QrCode className="h-5 w-5 text-blue-600 flex-shrink-0 mt-1" />
+                <div>
+                  <Typography variant="subtitle2" className="text-blue-900 font-semibold">
+                    Tips for best results:
+                  </Typography>
+                  <Typography variant="body2" className="text-blue-800 mt-1">
+                    • Ensure good lighting
+                    <br />
+                    • Keep the code steady in frame
+                    <br />
+                    • Clear any obstructions
+                  </Typography>
+                </div>
+              </Box>
+            </CardContent>
+          </Card>
+        </div>
+      </Container>
+    </div>
   );
 };
