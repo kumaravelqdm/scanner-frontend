@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useZxing } from "react-zxing";
+import { useZxing, DecodeHintType } from "react-zxing";
 import {
   Container,
   Card,
@@ -12,19 +12,34 @@ import {
   Paper,
 } from "@mui/material";
 import { QrCode, Copy, CheckCircle, AlertCircle } from "lucide-react";
+import { BarcodeFormat } from "@zxing/library";
 
 export const Validate = () => {
   const [barcode, setBarcode] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
+  const hints = new Map<DecodeHintType, any>();
+  hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+    BarcodeFormat.CODE_128,
+    BarcodeFormat.CODE_39,
+    BarcodeFormat.QR_CODE,
+  ]);
+
   const { ref } = useZxing({
+    constraints: {
+      video: {
+        facingMode: "environment",
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+      },
+    },
+    hints,
     onDecodeResult(result) {
       setBarcode(result.getText());
       setError("");
     },
     onDecodeError() {
-      // Avoid spamming errors, only show one occasionally
       if (!error) setError("Scanning...");
     },
   });
@@ -46,6 +61,7 @@ export const Validate = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12">
       <Container maxWidth="md">
         <div className="space-y-6">
+
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
@@ -69,10 +85,14 @@ export const Validate = () => {
               titleTypographyProps={{ variant: "h6" }}
             />
             <CardContent>
-              <Box className="flex flex-col items-center gap-6">
+              <Box className="flex flex-col items-center gap-6 relative">
+
+                {/* SCAN BOX OVERLAY */}
+                <Box className="absolute z-10 border-4 border-white/70 rounded-xl w-64 h-32 pointer-events-none"></Box>
+
                 <Paper
                   elevation={3}
-                  className="overflow-hidden bg-black rounded-lg"
+                  className="overflow-hidden bg-black rounded-lg relative"
                 >
                   <video
                     ref={ref}
@@ -173,11 +193,16 @@ export const Validate = () => {
                     • Keep the code steady in frame
                     <br />
                     • Clear any obstructions
+                    <br />
+                    • Move closer for small Code128 barcodes
+                    <br />
+                    • Center the barcode inside the white scan box
                   </Typography>
                 </div>
               </Box>
             </CardContent>
           </Card>
+
         </div>
       </Container>
     </div>
