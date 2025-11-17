@@ -17,6 +17,7 @@
     "@mui/material": "^7.3.2",
     "@supabase/supabase-js": "^2.57.4",
     "@types/node": "^24.5.2",
+    "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.3",
     "jsqr": "^1.4.0",
     "lucide-react": "^0.544.0",
