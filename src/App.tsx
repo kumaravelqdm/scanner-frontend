@@ -8,6 +8,7 @@ import { Signup } from './pages/Signup'
 import { Dashboard } from './pages/Dashboard'
 import { KeyManagement } from './pages/KeyManagement'
 import { Validate } from './pages/Validate'
+import { ValidateV1 } from './pages/v1'
 import { muiTheme } from './theme/muiTheme'
 import './App.css'
 
@@ -27,6 +28,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           {/* Validate route (public) */}
           <Route path="/validate" element={<Validate />} />
+          <Route path="/validate-v1" element={<ValidateV1 />} />
           <Route
             path="/dashboard"
             element={
