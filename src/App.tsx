@@ -9,6 +9,7 @@ import { Dashboard } from './pages/Dashboard'
 import { KeyManagement } from './pages/KeyManagement'
 import { Validate } from './pages/Validate'
 import { ValidateV1 } from './pages/v1'
+import { Analytics } from './pages/Analytics'
 import { muiTheme } from './theme/muiTheme'
 import './App.css'
 
@@ -54,10 +55,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <div className="text-center py-12">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-4">Analytics</h1>
-                    <p className="text-gray-600">Analytics dashboard coming soon...</p>
-                  </div>
+                  <Analytics />
                 </Layout>
               </ProtectedRoute>
             }

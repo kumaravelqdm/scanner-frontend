@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useUserStore } from '../store/userStore'
-import { Plus, Copy, Eye, EyeOff, Trash2, Key, AlertCircle } from 'lucide-react'
+import { Plus, Copy, Eye, EyeOff, Trash2, Key, AlertCircle, CheckCircle } from 'lucide-react'
 
 export const KeyManagement = () => {
+  const navigate = useNavigate()
   const { 
     apiKeys, 
     loading,
@@ -95,13 +97,22 @@ export const KeyManagement = () => {
           <p className="text-gray-600">Manage your API keys for the QR/Barcode scanner</p>
         </div>
         
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Create API Key
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate('/validate-v1')}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2"
+          >
+            <CheckCircle className="h-4 w-4" />
+            Validate Scan
+          </button>
+          <button
+            onClick={() => setShowCreateForm(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Create API Key
+          </button>
+        </div>
       </div>
 
       {/* Create API Key Form */}
