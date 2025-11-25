@@ -28,9 +28,7 @@ import { BarChart3, Filter, Database } from 'lucide-react'
 import {
   LineChart,
   Line,
-  PieChart as RechartsChart,
-  Pie,
-  Cell,
+  // PieChart as RechartsChart,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -91,16 +89,16 @@ export const Analytics = () => {
     return Array.from(dateMap, ([date, count]) => ({ date, scans: count })).slice(-14)
   }
 
-  const generateScanTypeData = () => {
-    const typeMap = new Map<string, number>()
-    scanLogs.forEach((log: any) => {
-      typeMap.set(log.scan_type, (typeMap.get(log.scan_type) || 0) + 1)
-    })
-    return Array.from(typeMap, ([type, value]) => ({ name: type, value }))
-  }
+  // const generateScanTypeData = () => {
+  //   const typeMap = new Map<string, number>()
+  //   scanLogs.forEach((log: any) => {
+  //     typeMap.set(log.scan_type, (typeMap.get(log.scan_type) || 0) + 1)
+  //   })
+  //   return Array.from(typeMap, ([type, value]) => ({ name: type, value }))
+  // }
 
   const chartData = generateChartData()
-  const scanTypeData = generateScanTypeData()
+  // const scanTypeData = generateScanTypeData()
 
   // Extract unique metadata keys from all logs
   useEffect(() => {
@@ -747,7 +745,7 @@ export const Analytics = () => {
 
         {/* Charts Section */}
         {chartData.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
             {/* Line Chart - Scan Trends */}
             <Card
               sx={{
